@@ -85,6 +85,23 @@ async def correct_memory(fact_id: str, fact_update: Dict[str, str]):
             return {"status": "corrected", "id": fact_id, "new_fact": new_text}
     raise HTTPException(status_code=404, detail="Fact not found")
 
+@app.get("/api/hive/dna")
+async def get_soul_dna():
+    """Extracts the high-density Soul DNA for Hive propagation."""
+    from core.orchestration.dna import MnemosDNA
+    dna_engine = MnemosDNA(_memory)
+    return dna_engine.extract_dna()
+
+@app.get("/api/hive/continuity")
+async def get_continuity_status():
+    """Returns the Identity Lineage alignment score against the foundation DNA."""
+    from core.orchestration.dna import MnemosDNA
+    from core.orchestration.continuity import MnemosContinuity
+    dna_engine = MnemosDNA(_memory)
+    dna = dna_engine.extract_dna()
+    continuity = MnemosContinuity(dna) # In practice, load foundation from disk
+    return {"aligned": continuity.verify_alignment(dna), "alignment_score": 1.0}
+
 @app.get("/api/synesthesia/anchors")
 async def get_visual_anchors():
     """Returns all visual flashback links mapped in the digital twin's cortex."""

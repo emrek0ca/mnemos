@@ -1,41 +1,27 @@
-# MNEMOS Cognitive Engine - Orchestration Layer
-
-.PHONY: help setup test dashboard ingest bot clean verify
-
-help:
-	@echo "🧠 MNEMOS Command Center"
-	@echo "------------------------"
-	@echo "setup     : Install dependencies via uv"
-	@echo "test      : Run full verification suite"
-	@echo "dashboard : Launch Mnemonic Command Center (Web UI)"
-	@echo "ingest    : Ingest Telegram chat export"
-	@echo "bot       : Launch Telegram Bot"
-	@echo "redact    : Run privacy redaction pipeline"
-	@echo "verify    : Run industrial-grade project verification"
+.PHONY: setup run test lint clean dashboard push
 
 setup:
 	uv sync
 
+run:
+	uv run python main.py
+
 test:
 	uv run python -m pytest tests/ -v
 
-dashboard:
-	uv run python -m apps.cli.main dashboard
-
-ingest:
-	@read -p "Path to export: " path; \
-	uv run python -m apps.cli.main ingest $$path
-
-bot:
-	uv run python -m apps.cli.main bot
-
-redact:
-	uv run python -m apps.cli.main redact
-
-verify: test
-	@echo "💎 MNEMOS Industrial Grade Integrity Verified."
+lint:
+	uv run ruff check .
+	uv run mypy .
 
 clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
-	rm -rf .pytest_cache
+	rm -rf artifacts/memory/*.json
+	rm -rf artifacts/logs/*.log
+
+dashboard:
+	uv run python -m core.api.server
+
+push:
+	git add .
+	git commit -m "evolution: mnemos core v3.0.0 | Hive Intelligence (Session 30) 💎🚀🧠" || true
+	git remote add origin https://github.com/emrek0ca/mnemos.git || true
+	git push -u origin main
