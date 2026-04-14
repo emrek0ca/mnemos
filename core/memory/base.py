@@ -1,4 +1,5 @@
 import json
+import anyio
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Type, TypeVar, Generic
 from loguru import logger
@@ -10,6 +11,7 @@ class BaseMemoryController(Generic[T]):
     """
     Unified Base for all Digital Twin memory tiers.
     Provides standardized persistence, logging, and error recovery.
+    Now optimized for async high-throughput operations.
     """
 
     def __init__(self, storage_path: Path, model_class: Type[T]):
@@ -17,6 +19,8 @@ class BaseMemoryController(Generic[T]):
         self.model_class = model_class
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Memory System: Initialized {self.__class__.__name__} -> {self.storage_path.name}")
+
+    # --- Sync Variants (Backward Compatibility) ---
 
     def _load_jsonl(self) -> List[T]:
         """Generic JSONL loader with corrupt line resilience."""
@@ -58,3 +62,20 @@ class BaseMemoryController(Generic[T]):
         """Overwrites the full JSON storage."""
         with open(self.storage_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, default=str, ensure_ascii=False)
+
+    # --- Async Variants for Velocity ---
+
+    async def aload_jsonl(self) -> List[T]:
+        return await anyio.to_thread.run_sync(self._load_jsonl)
+
+    async def aload_json_dict(self) -> Dict[str, Any]:
+        return await anyio.to_thread.run_sync(self._load_json_dict)
+
+    async def aappend_to_jsonl(self, item: T):
+        await anyio.to_thread.run_sync(self._append_to_jsonl, item)
+
+    async def asave_jsonl(self, items: List[T]):
+        await anyio.to_thread.run_sync(self._save_jsonl, items)
+
+    async def asave_full_json(self, data: Any):
+        await anyio.to_thread.run_sync(self._save_full_json, data)

@@ -32,16 +32,23 @@ class CognitiveTelemetry:
         logger.info(f"Telemetry: Consolidation event recorded ({fact_count} facts).")
 
     def get_health_report(self) -> Dict[str, Any]:
-        """Returns a snapshot of system cognitive health."""
+        """Returns a snapshot of system cognitive health and velocity."""
         if not self.latency_window:
             return {"status": "initializing"}
             
-        avg_latency = sum(self.latency_window) / len(self.latency_window)
+        lats = sorted(self.latency_window)
+        avg_latency = sum(lats) / len(lats)
+        p95_latency = lats[int(len(lats) * 0.95)] if len(lats) >= 10 else avg_latency
         hit_rate = sum(self.memory_hit_window) / len(self.memory_hit_window)
         
+        # Velocity metric (cycles per second equivalent)
+        velocity = 1000.0 / avg_latency if avg_latency > 0 else 0.0
+        
         return {
-            "status": "healthy" if avg_latency < 2000 else "degraded",
+            "status": "peak_performance" if p95_latency < 500 else ("healthy" if avg_latency < 1500 else "degraded"),
             "avg_latency_ms": round(avg_latency, 2),
+            "p95_latency_ms": round(p95_latency, 2),
+            "cognitive_velocity": round(velocity, 2),
             "memory_hit_rate": round(hit_rate, 2),
             "total_turns": self.total_turns,
             "facts_extracted": self.total_memories,

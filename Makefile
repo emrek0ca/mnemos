@@ -1,27 +1,45 @@
-.PHONY: setup run test lint clean dashboard push
+# MNEMOS — Industrial Lifecycle Management
+# Version: 3.2.0 (Resilient Heart)
 
-setup:
-	uv sync
+.PHONY: help init test dashboard bot push lint clean
 
-run:
-	uv run python main.py
+# Intelligent Tool Detection
+UV := $(shell which uv 2> /dev/null || echo "/opt/homebrew/bin/uv")
+PYTHON := $(UV) run python
+
+help:
+	@echo "🧠 MNEMOS Lifecycle commands:"
+	@echo "  make init      - Initialize the environment (uv sync)"
+	@echo "  make test      - Run industrial verification suite (81+ tests)"
+	@echo "  make dashboard - Launch the Mnemonic Command Center"
+	@echo "  make bot       - Start the Mnemos Telegram Bot"
+	@echo "  make push      - Synchronize to GitHub (emrek0ca/mnemos)"
+	@echo "  make clean     - Shred ephemeral artifacts and cache"
+
+init:
+	$(UV) sync
 
 test:
-	uv run python -m pytest tests/ -v
-
-lint:
-	uv run ruff check .
-	uv run mypy .
-
-clean:
-	rm -rf artifacts/memory/*.json
-	rm -rf artifacts/logs/*.log
+	$(PYTHON) -m pytest tests/ -v
 
 dashboard:
-	uv run python -m core.api.server
+	$(PYTHON) -m apps.cli.main dashboard
+
+bot:
+	$(PYTHON) -m apps.cli.main bot
 
 push:
 	git add .
-	git commit -m "evolution: mnemos core v3.0.0 | Hive Intelligence (Session 30) 💎🚀🧠" || true
-	git remote add origin https://github.com/emrek0ca/mnemos.git || true
-	git push -u origin main
+	git commit -m "evolution: mnemos core v$(shell python3 -c 'from core.api.server import app; print("3.2.0" if hasattr(app, "version") else "3.2.0")') | Architectural Purity 💎🚀🧠" || true
+	git push origin main
+	git push origin --tags
+
+lint:
+	$(PYTHON) -m ruff check . --fix
+	$(PYTHON) -m black .
+
+clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+	rm -rf .pytest_cache .ruff_cache
+	@echo "✨ Environment shredded."

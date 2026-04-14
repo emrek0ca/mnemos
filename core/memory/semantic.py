@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from loguru import logger
+from functools import lru_cache
 
 from core.memory.models import SemanticMemory
 from core.config.settings import settings
@@ -43,8 +44,9 @@ class SemanticMemoryController(BaseMemoryController[SemanticMemory]):
         """Persists the complete knowledge base to disk."""
         self._save_jsonl(list(self.knowledge.values()))
 
+    @lru_cache(maxsize=1024)
     def lookup(self, query: str) -> Optional[SemanticMemory]:
-        """Direct lookup of a fact."""
+        """Direct lookup of a fact with LRU caching."""
         return self.knowledge.get(query.lower())
 
     def get_by_category(self, category: str) -> List[SemanticMemory]:

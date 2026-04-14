@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 from loguru import logger
 from pathlib import Path
+import anyio
 
 from core.memory.episodic import EpisodicMemoryController
 from core.memory.semantic import SemanticMemoryController
@@ -34,19 +35,26 @@ class MemoryController:
         )
         logger.info(f"Memory Controller Online [Context: {fork_id or 'main'}]")
 
-    def perceive(self, content: str, sender_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
-        """Entry point for all new sensory/conversational data."""
+    async def perceive(self, content: str, sender_id: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        """Async entry point for sensory data ingestion."""
+        await self.episodic.aappend_to_jsonl(
+             EpisodicMemory(
+                id=f"epi_{int(anyio.current_time() * 1000)}",
+                content=content,
+                sender_id=sender_id,
+                metadata=metadata or {}
+            )
+        )
+        # Note: We still need to update the in-memory lists and FAISS index
+        # For now, we'll maintain the sync add() but plan for a full async Indexer.
         self.episodic.add(content, sender_id, metadata=metadata)
 
-    def retrieve_recent(self, limit: int = 10) -> List[EpisodicMemory]:
-        """Short-term recall from episodic memory."""
+    async def aretrieve_recent(self, limit: int = 10) -> List[EpisodicMemory]:
+        """Async short-term recall."""
         return self.episodic.retrieve_recent(limit=limit)
 
-    def search_semantic(self, query: str, limit: int = 3) -> List[EpisodicMemory]:
-        """
-        Long-term factual recall.
-        Currently uses semantic search on episodic data as a hybrid proxy.
-        """
+    async def asearch_semantic(self, query: str, limit: int = 3) -> List[EpisodicMemory]:
+        """Async semantic fact recall."""
         return self.episodic.search(query, limit=limit)
 
     def automatic_background_consolidate(self) -> None:

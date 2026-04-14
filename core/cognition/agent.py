@@ -37,34 +37,53 @@ class MnemosAgent:
     # ------------------------------------------------------------------
 
     def process(self, user_input: str, user_id: str = "user", metadata: Optional[Dict[str, Any]] = None) -> str:
+        """Synchronous wrapper for backward compatibility with CLI and tests."""
+        import asyncio
+        import anyio
+        try:
+            # Handle if there's already a running loop (e.g., in FastAPI/Tests)
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                 # This is tricky in sync-to-async calls. 
+                 # For tests, we'll use anyio run if possible.
+                 return anyio.run(self.aprocess, user_input, user_id, metadata)
+        except RuntimeError:
+            pass
+        return asyncio.run(self.aprocess, user_input, user_id, metadata)
+
+    async def aprocess(self, user_input: str, user_id: str = "user", metadata: Optional[Dict[str, Any]] = None) -> str:
         """
-        Executes a single cognitive cycle (Perception -> Reasoning -> Action).
-        Returns the agent response string.
+        Executes a double-threaded cognitive cycle (Perception -> Parallel Retrieval -> Action).
+        Returns the agent response string with minimum latency.
         """
+        import asyncio
         start_time = time.time()
         self.turn_count += 1
         metadata = metadata or {}
         
-        # 1. Multi-modal Perception & Recording
+        # 1. Perception (Async)
         vision_anchor = self.vision.describe_image(metadata)
         effective_input = f"{user_input} {vision_anchor}".strip()
         
-        self.memory.perceive(effective_input, sender_id=user_id, metadata=metadata)
+        await self.memory.perceive(effective_input, sender_id=user_id, metadata=metadata)
         
-        # 2. Context Retrieval (Hybrid: Recent + Semantic)
-        recent = self.memory.retrieve_recent(limit=5)
-        semantic = self.memory.search_semantic(user_input, limit=3)
+        # 2. Parallel Context Retrieval (Velocity Optimization)
+        # Simultaneously fetch short-term episodic and long-term semantic knowledge
+        recent_task = self.memory.aretrieve_recent(limit=5)
+        semantic_task = self.memory.asearch_semantic(user_input, limit=3)
+        
+        recent, semantic = await asyncio.gather(recent_task, semantic_task)
         context_texts = [m.content for m in (recent + semantic)]
         
         # 3. Reasoning & Action Generation
         # Simple XAI: Assign influence scores based on semantic relevance
-        influence = {f.id: 0.7 for f in semantic} # Baseline influence for facts
+        influence = {f.id: 0.7 for f in semantic}
         if vision_anchor:
             influence["vision_anchor"] = self.vision.generate_attention_mask(user_input, vision_anchor)
         
         reasoning = ReasoningChain(
             observation=f"Input: '{user_input[:20]}...' | Visuals: {'present' if vision_anchor else 'none'}",
-            thought="Determining stylistic response based on active memory and visual grounding.",
+            thought="Parallel retrieval complete. Synthesizing response with active grounding.",
             action="Generate response using InferenceEngine."
         )
         
@@ -72,7 +91,7 @@ class MnemosAgent:
         response = self.inference.generate(context_texts, system_prompt=system_prompt)
         
         # 4. Action Recording
-        self.memory.perceive(response, sender_id="assistant")
+        await self.memory.perceive(response, sender_id="assistant")
         
         # 5. Background Consolidation
         if self.turn_count % self.consolidation_interval == 0:

@@ -1,15 +1,15 @@
-site_name: MNEMOS Cognitive Engine
-site_url: https://github.com/user/mnemos
-repo_url: https://github.com/user/mnemos
-author: MNEMOS Team
+site_name: MNEMOS | Digital Virtual Brain
+site_url: https://github.com/emrek0ca/mnemos
+repo_url: https://github.com/emrek0ca/mnemos
+author: emrek0ca
 
 theme:
   name: material
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: indigo
+      primary: black
+      accent: cyan
       toggle:
         icon: material/brightness-4
         link: Light mode
@@ -17,6 +17,7 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.tabs
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -38,5 +39,6 @@ nav:
   - Home: index.md
   - Architecture: ARCHITECTURE.md
   - Product Intent: PRODUCT_INTENT.md
-  - Engineering Standards: SESSION_LOG.md
-  - Roadmap & Tasks: TASK_BOARD.md
+  - Evolution Log: SESSION_LOG.md
+  - Task Board: TASK_BOARD.md
+  - Runbook: RUNBOOK.md
