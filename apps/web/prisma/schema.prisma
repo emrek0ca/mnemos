@@ -1,0 +1,519 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String?
+  role         String   @default("USER")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  apiKeys   ApiKey[]
+  personas  Persona[]
+  usageLogs UsageLog[]
+  auditLogs AuditLog[]
+  
+  // Security & Compliance - NEW
+  abuseLogs       AbuseLog[]
+  consentRecords  ConsentRecord[]
+  encryptionKey   UserEncryptionKey?
+
+  @@map("users")
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  keyHash   String    @unique @map("key_hash")
+  keyPrefix String    @map("key_prefix")
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt DateTime? @map("expires_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  isActive  Boolean   @default(true) @map("is_active")
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  usageLogs     UsageLog[]
+  
+  // Security Audit - NEW
+  abuseLogs     AbuseLog[]
+  keyEvents     ApiKeyEvent[]
+
+  @@map("api_keys")
+}
+
+model Persona {
+  id               String   @id @default(uuid())
+  userId           String   @map("user_id")
+  name             String
+  identityMemory   String?  @map("identity_memory") // JSON stored as string
+  preferences      String?  // JSON stored as string
+  system1Weight    Float    @default(0.5) @map("system1_weight")
+  system2Weight    Float    @default(0.5) @map("system2_weight")
+  decisionThreshold Float   @default(0.7) @map("decision_threshold")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  
+  // Clone/Fork Mekanizması - NEW (Premium Feature)
+  parentPersonaId  String?  @map("parent_persona_id")
+  cloneReason      String?  @map("clone_reason")
+  isClone          Boolean  @default(false) @map("is_clone")
+
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memoryEntries     MemoryEntry[]
+  conversations     Conversation[]
+  consistencyLogs   ConsistencyLog[]
+  identitySnapshots IdentitySnapshot[]
+  memoryClusters    MemoryCluster[]
+  proactiveMessages ProactiveMessage[]
+  consentRecords    ConsentRecord[]
+  
+  // Digital Personality Engine - NEW
+  personalityDNA    PersonalityDNA?
+  mentalStateLogs   MentalStateLog[]
+  valueNodes        ValueNode[]
+  valueEdges        ValueEdge[]
+
+  @@map("personas")
+}
+
+// ==================== DIGITAL PERSONALITY ENGINE ====================
+
+// Kişilik DNA'sı - Değişmez çekirdek karakteristikler
+model PersonalityDNA {
+  id              String   @id @default(uuid())
+  personaId       String   @unique @map("persona_id")
+  
+  // ========== BIG FIVE (OCEAN) - Bilimsel Kişilik Modeli ==========
+  openness          Float    @default(0.5)  // Yeni deneyimlere açıklık
+  conscientiousness Float    @default(0.5)  // Düzenlilik, sorumluluk
+  extraversion      Float    @default(0.5)  // Dışadönüklük
+  agreeableness     Float    @default(0.5)  // Uyumluluk, işbirliği
+  neuroticism       Float    @default(0.5)  // Duygusal dalgalanma, kaygı
+  
+  // ========== Bilişsel Stil ==========
+  decisionSpeed     Float    @default(0.5) @map("decision_speed")     // Çabuk/yavaş karar alıcı
+  abstractThinking  Float    @default(0.5) @map("abstract_thinking")  // Somut/soyut düşünce
+  pastVsFuture      Float    @default(0.5) @map("past_vs_future")     // Geçmiş/gelecek odaklı
+  detailOrientation Float    @default(0.5) @map("detail_orientation") // Büyük resim/detay odaklı
+  
+  // ========== Temel Kişilik Eksenleri (0-1) ==========
+  dominance       Float    @default(0.5)  // Baskınlık vs boyun eğme
+  empathy         Float    @default(0.5)  // Empati kapasitesi
+  logicVsEmotion  Float    @default(0.5) @map("logic_vs_emotion")  // Mantık ağırlıklı mı?
+  selfFocus       Float    @default(0.5) @map("self_focus")  // Ben-merkezcilik
+  conflictStyle   String   @default("diplomatic")  // direct, passive, avoidant, diplomatic
+  
+  // ========== Tepki Profili (0-1) ==========
+  angerThreshold     Float @default(0.5) @map("anger_threshold")     // Sinir eşiği
+  praiseResponse     Float @default(0.5) @map("praise_response")     // Övgüye tepki
+  criticismResponse  Float @default(0.5) @map("criticism_response")  // Eleştiriye tepki
+  silenceComfort     Float @default(0.5) @map("silence_comfort")     // Sessizlik konforu
+  stressResponse     Float @default(0.5) @map("stress_response")     // Stres altında tepki (0=donma, 1=savaş)
+  
+  // ========== İfade Kısıtları ==========
+  maxSentenceLength     Int   @default(150) @map("max_sentence_length")
+  maxQuestionsPerTurn   Int   @default(2) @map("max_questions_per_turn")
+  explainEverything     Boolean @default(false) @map("explain_everything")
+  
+  // ========== Kurulum Durumu ==========
+  setupCompleted    Boolean  @default(false) @map("setup_completed")
+  setupStep         Int      @default(0) @map("setup_step")
+  
+  // ========== Versioning (Kişilik Drift Analizi) ==========
+  version               Int     @default(1)
+  isActive              Boolean @default(true) @map("is_active_dna")
+  createdBy             String  @default("SYSTEM") @map("created_by")
+  // ADMIN | SYSTEM | USER
+  previousVersionId     String? @map("previous_version_id")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  
+  @@map("personality_dna")
+}
+
+// Ruh Hali Takibi - Her etkileşimde değişen state
+model MentalStateLog {
+  id              String   @id @default(uuid())
+  personaId       String   @map("persona_id")
+  conversationId  String?  @map("conversation_id")
+  
+  // State parametreleri (0-1)
+  energy          Float    @default(0.7)    // Enerji seviyesi
+  irritation      Float    @default(0.2)    // Sinirlilik
+  confidence      Float    @default(0.6)    // Özgüven
+  focus           Float    @default(0.7)    // Odaklanma
+  openness        Float    @default(0.6)    // Konuşmaya açıklık
+  patience        Float    @default(0.7)    // Sabır
+  
+  // Bağlam
+  timeOfDay       String?  @map("time_of_day")  // morning, afternoon, evening, night
+  topicHeaviness  Float    @default(0.5) @map("topic_heaviness")  // Konu ağırlığı
+  turnCount       Int      @default(0) @map("turn_count")  // Konuşma uzunluğu
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  
+  @@index([personaId])
+  @@index([createdAt])
+  @@map("mental_state_logs")
+}
+
+// Değer Graf Düğümleri
+model ValueNode {
+  id              String   @id @default(uuid())
+  personaId       String   @map("persona_id")
+  
+  name            String   // money, ethics, freedom, love, power, family, career, health
+  displayName     String   @map("display_name")  // Türkçe: "Para", "Etik", "Özgürlük"
+  weight          Float    @default(0.5)  // Bu değerin kişi için önemi (0-1)
+  description     String?  // Kişiye özel açıklama
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  persona         Persona     @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  edgesFrom       ValueEdge[] @relation("EdgeFrom")
+  edgesTo         ValueEdge[] @relation("EdgeTo")
+  
+  @@unique([personaId, name])
+  @@index([personaId])
+  @@map("value_nodes")
+}
+
+// Değer Graf Kenarları - Değerler arası ilişkiler
+model ValueEdge {
+  id              String   @id @default(uuid())
+  personaId       String   @map("persona_id")
+  fromNodeId      String   @map("from_node_id")
+  toNodeId        String   @map("to_node_id")
+  
+  relationship    String   // supports, conflicts, neutral
+  strength        Float    @default(0.5)  // İlişki gücü (0-1)
+  description     String?  // Neden bu ilişki var?
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  persona         Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  fromNode        ValueNode @relation("EdgeFrom", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode          ValueNode @relation("EdgeTo", fields: [toNodeId], references: [id], onDelete: Cascade)
+  
+  @@unique([personaId, fromNodeId, toNodeId])
+  @@index([personaId])
+  @@map("value_edges")
+}
+
+model IdentitySnapshot {
+  id              String   @id @default(uuid())
+  personaId       String   @map("persona_id")
+  version         Int
+  identityState   String   @map("identity_state") // Complete IdentityCore JSON
+  reasonForChange String?  @map("reason_for_change")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId])
+  @@map("identity_snapshots")
+}
+
+// ==================== ENHANCED MEMORY MODELS ====================
+
+model MemoryEntry {
+  id              String     @id @default(uuid())
+  personaId       String     @map("persona_id")
+  type            String     // SHORT_TERM, EPISODIC, IDENTITY, INTERNAL_MONOLOGUE
+  content         String
+  embedding       String?    // JSON array stored as string
+  
+  // Structured Metadata
+  topic           String?
+  people          String?    // JSON array of people names
+  location        String?
+  emotion         String?    // Primary emotion
+  
+  importanceScore Float      @default(0.5) @map("importance_score")
+  accessCount     Int        @default(0) @map("access_count")
+  lastAccessed    DateTime?  @map("last_accessed")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  expiresAt       DateTime?  @map("expires_at")
+  
+  // Psikanalitik State Yönetimi - NEW
+  memoryState     String     @default("ACTIVE") @map("memory_state")
+  // ACTIVE | SUPPRESSED | RECALLED | ARCHIVED
+  suppressedAt    DateTime?  @map("suppressed_at")
+  recalledAt      DateTime?  @map("recalled_at")
+  archivedAt      DateTime?  @map("archived_at")
+  
+  // Kaynak Takibi - NEW (Hukuki Koruma)
+  sourceType      String     @default("USER_INPUT") @map("source_type")
+  // USER_INPUT | SYSTEM_INFERENCE | EXTERNAL_IMPORT | THERAPY_SESSION
+  confidenceOrigin Float     @default(1.0) @map("confidence_origin")
+  
+  // Hot/Cold Tier - NEW (Maliyet Optimizasyonu)
+  storageTier     String     @default("HOT") @map("storage_tier")
+  // HOT | WARM | COLD
+  
+  // Clustering for pattern recognition
+  clusterId       String?    @map("cluster_id")
+  cluster         MemoryCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId, type])
+  @@index([topic])
+  @@index([importanceScore])
+  @@index([memoryState])
+  @@index([storageTier])
+  @@map("memory_entries")
+}
+
+model MemoryCluster {
+  id          String   @id @default(uuid())
+  personaId   String   @map("persona_id")
+  name        String   // Auto-generated name (e.g., "Childhood Trauma", "Work Stress")
+  description String?
+  centroid    String?  // JSON array representation of cluster center
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  memories MemoryEntry[]
+  persona  Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId])
+  @@map("memory_clusters")
+}
+
+model ProactiveMessage {
+  id          String    @id @default(uuid())
+  personaId   String    @map("persona_id")
+  content     String
+  urgency     Float     @default(0.5)
+  topic       String?
+  mood        String?
+  isDelivered Boolean   @default(false) @map("is_delivered")
+  deliveredAt DateTime? @map("delivered_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+
+  @@index([personaId])
+  @@index([isDelivered])
+  @@map("proactive_messages")
+}
+
+// ==================== RESTORED MISSING MODELS ====================
+
+model Conversation {
+  id        String    @id @default(uuid())
+  personaId String    @map("persona_id")
+  apiKeyId  String    @map("api_key_id")
+  startedAt DateTime  @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+  metadata  String?   // JSON stored as string
+
+  persona  Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  apiKey   ApiKey    @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  messages Message[]
+  decisions Decision[]
+
+  @@index([personaId])
+  @@index([apiKeyId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String   @map("conversation_id")
+  role           String   // USER, ASSISTANT, SYSTEM
+  content        String
+  reasoningTrace String?  @map("reasoning_trace") // JSON stored as string
+  processingType String   @default("SYSTEM1") @map("processing_type") // SYSTEM1, SYSTEM2, HYBRID
+  tokensUsed     Int      @default(0) @map("tokens_used")
+  latencyMs      Float    @default(0) @map("latency_ms")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  decisions    Decision[]
+  consistencyLogs ConsistencyLog[]
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model Decision {
+  id              String   @id @default(uuid())
+  conversationId  String   @map("conversation_id")
+  messageId       String   @map("message_id")
+  decisionContext String   @map("decision_context")
+  decisionOutcome String   @map("decision_outcome")
+  confidenceScore Float    @map("confidence_score")
+  gateResult      String   @map("gate_result") // FAST_TRACK, ESCALATED
+  reasoningChain  String?  @map("reasoning_chain") // JSON stored as string
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  message      Message      @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("decisions")
+}
+
+model UsageLog {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  apiKeyId     String?  @map("api_key_id")
+  logDate      DateTime @map("log_date")
+  requestsCount Int     @default(0) @map("requests_count")
+  tokensInput  Int      @default(0) @map("tokens_input")
+  tokensOutput Int      @default(0) @map("tokens_output")
+  costUsd      Float    @default(0) @map("cost_usd")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, apiKeyId, logDate])
+  @@map("usage_logs")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?  @map("user_id")
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String?  @map("resource_id")
+  oldValue     String?  @map("old_value") // JSON stored as string
+  newValue     String?  @map("new_value") // JSON stored as string
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  severity     String   @default("INFO") // INFO, WARNING, CRITICAL
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([resourceType])
+  @@index([severity])
+  @@map("audit_logs")
+}
+
+model ConsistencyLog {
+  id             String   @id @default(uuid())
+  personaId      String   @map("persona_id")
+  messageId      String?  @map("message_id")
+  deviationScore Float    @map("deviation_score")
+  detectedIssue  String   @map("detected_issue")
+  context        String   @map("context") // JSON: pastStatement, currentStatement, topic
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  persona Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  message Message? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([personaId])
+  @@map("consistency_logs")
+}
+
+// ==================== SECURITY & COMPLIANCE - NEW ====================
+
+// Kötüye Kullanım Takibi
+model AbuseLog {
+  id              String   @id @default(uuid())
+  ipAddress       String   @map("ip_address")
+  apiKeyId        String?  @map("api_key_id")
+  userId          String?  @map("user_id")
+  riskScore       Float    @map("risk_score")
+  detectedPattern String   @map("detected_pattern")
+  // RATE_LIMIT | PROMPT_INJECTION | DATA_EXFIL | ANOMALY
+  actionTaken     String   @map("action_taken")
+  // NONE | THROTTLED | BLOCKED | FLAGGED
+  metadata        String?  // JSON for additional context
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([ipAddress])
+  @@index([riskScore])
+  @@index([createdAt])
+  @@map("abuse_logs")
+}
+
+// API Anahtar Yaşam Döngüsü Denetimi
+model ApiKeyEvent {
+  id          String   @id @default(uuid())
+  keyId       String   @map("key_id")
+  eventType   String   @map("event_type")
+  // CREATED | ROTATED | REVOKED | EXPIRED | USED
+  triggeredBy String   @map("triggered_by")
+  // USER | SYSTEM | ADMIN
+  ipAddress   String?  @map("ip_address")
+  metadata    String?  // JSON for additional context
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  apiKey ApiKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  
+  @@index([keyId])
+  @@index([eventType])
+  @@map("api_key_events")
+}
+
+// GDPR Rıza Kaydı
+model ConsentRecord {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  personaId   String?   @map("persona_id")
+  scope       String    
+  // DATA_COLLECTION | MEMORY_STORAGE | AI_PROCESSING | THIRD_PARTY | ANALYTICS
+  version     String    // Consent policy version (e.g., "v1.0", "v2.0")
+  grantedAt   DateTime  @default(now()) @map("granted_at")
+  revokedAt   DateTime? @map("revoked_at")
+  ipAddress   String?   @map("ip_address")
+  userAgent   String?   @map("user_agent")
+  
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  persona Persona? @relation(fields: [personaId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([scope])
+  @@index([grantedAt])
+  @@map("consent_records")
+}
+
+// Crypto-Shredding için Şifreleme Anahtarı Yönetimi
+model UserEncryptionKey {
+  id            String    @id @default(uuid())
+  userId        String    @unique @map("user_id")
+  keyVersion    Int       @default(1) @map("key_version")
+  keyHash       String    @map("key_hash")
+  // Anahtar yok edildiğinde, şifreli tüm veri anlamsızlaşır (GDPR silme)
+  isDestroyed   Boolean   @default(false) @map("is_destroyed")
+  destroyedAt   DateTime? @map("destroyed_at")
+  destroyReason String?   @map("destroy_reason")
+  // USER_REQUEST | ACCOUNT_DELETION | ADMIN_ACTION | AUTO_EXPIRE
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_encryption_keys")
+}

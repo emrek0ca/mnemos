@@ -1,0 +1,42 @@
+site_name: MNEMOS Cognitive Engine
+site_url: https://github.com/user/mnemos
+repo_url: https://github.com/user/mnemos
+author: MNEMOS Team
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        link: Light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Architecture: ARCHITECTURE.md
+  - Product Intent: PRODUCT_INTENT.md
+  - Engineering Standards: SESSION_LOG.md
+  - Roadmap & Tasks: TASK_BOARD.md

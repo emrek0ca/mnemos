@@ -1,0 +1,39 @@
+{
+  "name": "Saved Messages",
+  "type": "personal_chat",
+  "id": 123456,
+  "messages": [
+    {
+      "id": 1,
+      "type": "message",
+      "date": "2026-04-13T23:40:11.540887",
+      "from": "Self",
+      "from_id": "user123",
+      "text": "Hello, this is a test message with a phone number +1234567890 and an email test@example.com"
+    },
+    {
+      "id": 2,
+      "type": "message",
+      "date": "2026-04-14T00:40:11.540901",
+      "from": "Other",
+      "from_id": "user456",
+      "text": "How is the project going?"
+    },
+    {
+      "id": 3,
+      "type": "message",
+      "date": "2026-04-14T01:40:11.540904",
+      "from": "Self",
+      "from_id": "user123",
+      "reply_to_message_id": 2,
+      "text": [
+        "It is going well. ",
+        {
+          "type": "link",
+          "text": "https://mnemos.ai"
+        },
+        " is the repo."
+      ]
+    }
+  ]
+}

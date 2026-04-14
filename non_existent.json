@@ -1,0 +1,9 @@
+[
+  {
+    "fact_id": "gen",
+    "content": "Genesis Fact",
+    "timestamp": "2026-04-14T03:18:23.094580",
+    "previous_hash": "GENESIS",
+    "current_hash": "b1f3a9efaebde1e8b5cd1f428ab0b06c8663b1bb184a571351d30e259ae02d8b"
+  }
+]
