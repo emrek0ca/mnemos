@@ -5,5 +5,19 @@
     "timestamp": "2026-04-14T03:18:23.094580",
     "previous_hash": "GENESIS",
     "current_hash": "b1f3a9efaebde1e8b5cd1f428ab0b06c8663b1bb184a571351d30e259ae02d8b"
+  },
+  {
+    "fact_id": "gen",
+    "content": "Genesis Fact",
+    "timestamp": "2026-04-14T03:36:41.553474",
+    "previous_hash": "b1f3a9efaebde1e8b5cd1f428ab0b06c8663b1bb184a571351d30e259ae02d8b",
+    "current_hash": "7eab68bb2b896dfb1f4d8e8e3063d0dadcc9c72a2aad6ccb25d93f17eadda11d"
+  },
+  {
+    "fact_id": "gen",
+    "content": "Genesis Fact",
+    "timestamp": "2026-04-14T03:37:32.658085",
+    "previous_hash": "7eab68bb2b896dfb1f4d8e8e3063d0dadcc9c72a2aad6ccb25d93f17eadda11d",
+    "current_hash": "fc258f1ff73ab16de4af1f70d723a8591c6538692e6be5875797d8aa824a5a15"
   }
 ]

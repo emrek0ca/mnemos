@@ -7,28 +7,18 @@ from loguru import logger
 
 from core.memory.models import ProceduralMemory
 from core.config.settings import settings
+from core.memory.base import BaseMemoryController
 
-class ProceduralMemoryController:
+class ProceduralMemoryController(BaseMemoryController[ProceduralMemory]):
     """
     Tracks and encodes stylistic habits and behavioral routines.
-    (e.g., preference for short answers, emoji frequency, specific jargon).
+    Refactored to use BaseMemoryController.
     """
 
     def __init__(self, storage_path: Optional[Path] = None):
-        self.storage_path = storage_path or settings.ARTIFACTS_DIR / "memory" / "procedural.jsonl"
-        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        self.patterns: List[ProceduralMemory] = []
-        self._load()
-
-    def _load(self):
-        if not self.storage_path.exists():
-            return
-        with open(self.storage_path, "r", encoding="utf-8") as f:
-            for line in f:
-                try:
-                    self.patterns.append(ProceduralMemory(**json.loads(line)))
-                except Exception as e:
-                    logger.warning(f"Corrupt procedural memory line: {e}")
+        path = storage_path or settings.ARTIFACTS_DIR / "memory" / "procedural.jsonl"
+        super().__init__(path, ProceduralMemory)
+        self.patterns: List[ProceduralMemory] = self._load_jsonl()
 
     def capture_habit(self, pattern_name: str, description: str, parameters: Dict[str, Any]):
         """Records a detected stylistic habit."""
@@ -40,15 +30,13 @@ class ProceduralMemoryController:
             importance=0.8
         )
         self.patterns.append(pattern)
-        with open(self.storage_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps(pattern.model_dump(), default=str, ensure_ascii=False) + "\n")
+        self._append_to_jsonl(pattern)
         logger.info(f"Procedural habit recorded: {pattern_name}")
 
     def get_stylistic_profile(self) -> Dict[str, Any]:
         """Summarizes all known habits into a single profile for the LLM."""
         profile = {}
         for p in self.patterns:
-            # We take the most recent parameters for each pattern type
             profile[p.pattern_name] = p.parameters
         return profile
 
@@ -61,7 +49,6 @@ class ProceduralMemoryController:
         avg_len = np.mean([len(t) for t in texts])
         emoji_count = np.mean([emoji.emoji_count(t) for t in texts])
         
-        # Simple thresholding to detect 'Preference' habits
         if avg_len < 30:
             self.capture_habit("verbosity", "Prefers concise, short responses.", {"mode": "laconic", "avg_chars": avg_len})
         elif avg_len > 150:

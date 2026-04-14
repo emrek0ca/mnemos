@@ -1,9 +1,9 @@
 import pytest
-from core.cognition.affect import AffectiveAnalyzer
+from core.cognition.affect import MnemosAffect
 from core.plugins.audio import AudioPerceptionPlugin
 
 def test_affect_valence():
-    analyzer = AffectiveAnalyzer()
+    analyzer = MnemosAffect()
     
     pos = analyzer.analyze_message("This is a wonderful and amazing success!")
     neg = analyzer.analyze_message("This is a terrible and awful failure.")
@@ -14,7 +14,7 @@ def test_affect_valence():
     assert neu["valence"] == 0
 
 def test_affect_arousal():
-    analyzer = AffectiveAnalyzer()
+    analyzer = MnemosAffect()
     
     high = analyzer.analyze_message("WOW!!! DANGER!!! URGENT!!!")
     low = analyzer.analyze_message("Please calm down and relax slowly.")

@@ -1,17 +1,28 @@
 import os
 from pathlib import Path
 from typing import Dict, Any, List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
+import traceback
 
 from core.memory.controller import MemoryController
 from core.orchestration.worker import worker
 from core.utils.telemetry import telemetry
 from core.config.settings import settings
 
-app = FastAPI(title="MNEMOS Cognitive API", version="1.2.6")
+app = FastAPI(title="MNEMOS Cognitive API", version="3.1.0")
+
+# Global Exception Handler for Industrial Resilience
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"API Error on {request.url.path}: {exc}\n{traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Cognitive Error", "type": str(type(exc).__name__)}
+    )
 
 # Lifecycle Orchestration
 _memory = MemoryController()
@@ -33,10 +44,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Shared memory controller for tracking (initialized on first request or startup)
-# In production, this would be a persistent singleton
-_memory = MemoryController()
 
 @app.get("/api/health")
 async def health():
@@ -262,8 +269,8 @@ async def get_worker_status():
 @app.get("/api/reflect/pulse")
 async def get_affective_pulse():
     """Analyzes the current emotional tone of the digital twin."""
-    from core.cognition.affect import AffectiveAnalyzer
-    analyzer = AffectiveAnalyzer()
+    from core.cognition.affect import MnemosAffect
+    analyzer = MnemosAffect()
     recent = _memory.retrieve_recent(limit=20)
     return analyzer.get_aggregate_pulse([m.content for m in recent])
 

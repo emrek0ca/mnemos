@@ -5,32 +5,23 @@ from loguru import logger
 
 from core.memory.models import SemanticMemory
 from core.config.settings import settings
+from core.memory.base import BaseMemoryController
 
-
-class SemanticMemoryController:
+class SemanticMemoryController(BaseMemoryController[SemanticMemory]):
     """
     Manages long-term factual knowledge and preferences.
+    Refactored to use BaseMemoryController for unified storage logic.
     """
 
     def __init__(self, storage_path: Optional[Path] = None):
-        self.storage_path = storage_path or settings.ARTIFACTS_DIR / "memory" / "semantic.jsonl"
-        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        self.knowledge: Dict[str, SemanticMemory] = self._load()
+        path = storage_path or settings.ARTIFACTS_DIR / "memory" / "semantic.jsonl"
+        super().__init__(path, SemanticMemory)
+        self.knowledge: Dict[str, SemanticMemory] = self._load_map()
 
-    def _load(self) -> Dict[str, SemanticMemory]:
-        if not self.storage_path.exists():
-            return {}
-        
-        knowledge = {}
-        with open(self.storage_path, "r", encoding="utf-8") as f:
-            for line in f:
-                try:
-                    mem = SemanticMemory(**json.loads(line))
-                    # Use fact as key for simple deduplication/lookup
-                    knowledge[mem.fact.lower()] = mem
-                except Exception as e:
-                    logger.warning(f"Failed to parse semantic line: {e}")
-        return knowledge
+    def _load_map(self) -> Dict[str, SemanticMemory]:
+        """Loads items and indexes them by fact content."""
+        items = self._load_jsonl()
+        return {m.fact.lower(): m for m in items}
 
     def add_fact(self, fact: str, category: str, confidence: float = 1.0, source_ids: List[str] = None, status: str = "pending_review", visibility: str = "private", metadata: Dict[str, Any] = None):
         """Records a new semantic fact."""
@@ -45,14 +36,12 @@ class SemanticMemoryController:
             metadata=metadata or {}
         )
         self.knowledge[fact.lower()] = memory
-        self._save()
+        self._append_to_jsonl(memory)
         logger.info(f"New semantic knowledge added [{category}]: {fact}")
 
     def _save(self):
         """Persists the complete knowledge base to disk."""
-        with open(self.storage_path, "w", encoding="utf-8") as f:
-            for mem in self.knowledge.values():
-                f.write(json.dumps(mem.model_dump(mode="json"), ensure_ascii=False) + "\n")
+        self._save_jsonl(list(self.knowledge.values()))
 
     def lookup(self, query: str) -> Optional[SemanticMemory]:
         """Direct lookup of a fact."""

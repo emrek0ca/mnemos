@@ -27,8 +27,9 @@ def test_ledger_chain_integrity(tmp_path):
     corrupt_ledger = MnemosLedger(ledger_path=str(ledger_file))
     assert corrupt_ledger.verify_chain_integrity() is False
 
-def test_ledger_genesis():
-    ledger = MnemosLedger(ledger_path="non_existent.json")
+def test_ledger_genesis(tmp_path):
+    ledger_path = tmp_path / "ledger.json"
+    ledger = MnemosLedger(ledger_path=str(ledger_path))
     h = ledger.anchor_fact("gen", "Genesis Fact")
     assert len(ledger._chain) == 1
     assert ledger._chain[0]["previous_hash"] == "GENESIS"
