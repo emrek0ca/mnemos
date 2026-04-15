@@ -8,20 +8,7 @@ from loguru import logger
 from core.memory.models import EpisodicMemory
 from core.config.settings import settings
 from core.memory.base import BaseMemoryController
-
-# Lazy encoder loader
-_encoder = None
-
-def _get_encoder():
-    global _encoder
-    if _encoder is not None:
-        return _encoder
-    try:
-        from sentence_transformers import SentenceTransformer
-        _encoder = SentenceTransformer("all-MiniLM-L6-v2")
-    except ImportError:
-        logger.warning("sentence-transformers missing. Falling back to keyword search.")
-    return _encoder
+from core.utils.encoding import encoder
 
 class EpisodicMemoryController(BaseMemoryController[EpisodicMemory]):
     """
@@ -37,7 +24,7 @@ class EpisodicMemoryController(BaseMemoryController[EpisodicMemory]):
         self.memories: List[EpisodicMemory] = self._load_jsonl()
         self._embeddings: Optional[np.ndarray] = self._load_embeddings()
         self._index = None # FAISS index
-        self._encoder = _get_encoder()
+        self._encoder = encoder # Use centralized v5.1.0 substrate
 
         # Build/Restore Vector State
         if self._embeddings is not None:

@@ -7,26 +7,65 @@ class VisionPerceptionEngine:
     Prepares the system for full VLM (Vision-Language Model) integration.
     """
 
-    def describe_image(self, metadata: Dict[str, Any]) -> str:
+    def __init__(self):
+        from core.inference.engine import InferenceEngine
+        self.inference = InferenceEngine()
+
+    def describe_image(self, metadata: Dict[str, Any], user_input: str = "") -> str:
         """
-        Translates raw metadata into a semantic description.
-        In a production system, this would call Clip, Llava, or GPT-4o-vision.
+        Translates raw visual stimuli into semantic episodic anchors.
         """
-        if not metadata.get("has_photo"):
+        media_uri = metadata.get("media_uri")
+        if not media_uri:
             return ""
 
-        # Simulation Logic: Infer basic anchors from metadata properties
-        # (e.g., file size, resolution, or AI-generated placeholders)
-        media_type = metadata.get("media_type", "unspecified image")
+        from core.config.settings import settings
+        local_path = settings.ARTIFACTS_DIR / media_uri.replace("/media/", "")
         
-        # Silicon Valley Grade: Adding noise/context simulation to simulate real VLM uncertainty
-        anchors = [
-            f"[Visual Perception: {media_type}]",
-            "Context: User provided a visual attachment alongside the message.",
-            "Visual Status: Anchored in episodic context."
-        ]
+        if not local_path.exists():
+            return "[Visual Perception Error: Media Missing]"
+
+        try:
+            import base64
+            with open(local_path, "rb") as f:
+                b64_img = base64.b64encode(f.read()).decode('utf-8')
+            
+            description = self.inference.generate_with_vision(
+                prompt=f"Analyze this image in the context of: '{user_input}'. Provide a concise semantic summary.",
+                base64_image=b64_img,
+                system_prompt="You are the visual cortex. Describe only facts."
+            )
+            return f"[Visual Context: {description}]"
+        except Exception as e:
+            logger.error(f"Visual Synchrony Failure: {e}")
+            return "[Visual Perception: Synchrony Lost]"
+
+    def analyze_resonance(self, metadata: Dict[str, Any]) -> Dict[str, float]:
+        """
+        Extracts emotional markers from visual stimuli to feed the Affect Engine.
+        """
+        media_uri = metadata.get("media_uri")
+        if not media_uri:
+            return {"valence": 0.0, "arousal": 0.0}
+
+        from core.config.settings import settings
+        local_path = settings.ARTIFACTS_DIR / media_uri.replace("/media/", "")
         
-        return " | ".join(anchors)
+        if not local_path.exists():
+            return {"valence": 0.0, "arousal": 0.0}
+
+        try:
+            import base64
+            with open(local_path, "rb") as f:
+                b64_img = base64.b64encode(f.read()).decode('utf-8')
+            
+            # Extract emotional markers from pixels
+            resonance_data = self.inference.analyze_visual_resonance(b64_img)
+            # Map description to affect scores
+            return self.inference.affect.analyze_image_pulse(resonance_data.get("description", ""))
+        except Exception as e:
+            logger.error(f"Visual Resonance Audit Failed: {e}")
+            return {"valence": 0.0, "arousal": 0.0}
 
     def generate_attention_mask(self, text: str, vision_anchor: str) -> float:
         """

@@ -50,5 +50,19 @@ yarn-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# MNEMOS Industrial Logs
+server.log
+*.log
+apps/web/web.log
+
+# User-Specific / Dynamic Data (NEVER commit)
+artifacts/users.json
+artifacts/forks/
+artifacts/backups/
+
+# Local Demos / Experiments
+web/
+weclone_repo/
+
 # Gemini scratch
 .gemini/

@@ -25,6 +25,8 @@ class SemanticFact(BaseModel):
     confidence: float
     source_ids: List[str]
     category: str = "general"
+    original_media_uri: Optional[str] = None # Provenance: The exact visual anchor for this fact
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 class ConsolidatedMemory(BaseModel):
     """Output of the System 2 consolidation process."""

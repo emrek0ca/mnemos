@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 from typing import Dict, Any, List
 from collections import deque
 from loguru import logger
@@ -13,6 +14,7 @@ class CognitiveTelemetry:
         # Rolling windows for metrics
         self.latency_window = deque(maxlen=window_size)
         self.memory_hit_window = deque(maxlen=window_size)
+        self.event_buffer = deque(maxlen=100) # Forensic Audit Log
         
         self.total_turns = 0
         self.total_memories = 0
@@ -25,16 +27,28 @@ class CognitiveTelemetry:
         self.memory_hit_window.append(memory_hits > 0)
         logger.debug(f"Telemetry recorded: latency={latency_ms:.2f}ms, hits={memory_hits}")
 
+    def record_event(self, event_type: str, details: str, intensity: str = "INFO"):
+        """Records a forensic system event (e.g., Refactor, Shred, Identity shift)."""
+        event = {
+            "type": event_type,
+            "details": details,
+            "intensity": intensity,
+            "timestamp": datetime.now().isoformat()
+        }
+        self.event_buffer.append(event)
+        logger.info(f"Forensic Event [{intensity}]: {event_type} - {details}")
+
     def record_consolidation(self, fact_count: int):
         """Records a System 2 consolidation event."""
         self.consolidations += 1
         self.total_memories += fact_count
+        self.record_event("CONSOLIDATION", f"Extracted {fact_count} semantic facts.", "SUCCESS")
         logger.info(f"Telemetry: Consolidation event recorded ({fact_count} facts).")
 
     def get_health_report(self) -> Dict[str, Any]:
         """Returns a snapshot of system cognitive health and velocity."""
         if not self.latency_window:
-            return {"status": "initializing"}
+            return {"status": "initializing", "events": list(self.event_buffer)}
             
         lats = sorted(self.latency_window)
         avg_latency = sum(lats) / len(lats)
@@ -52,7 +66,8 @@ class CognitiveTelemetry:
             "memory_hit_rate": round(hit_rate, 2),
             "total_turns": self.total_turns,
             "facts_extracted": self.total_memories,
-            "consolidation_count": self.consolidations
+            "consolidation_count": self.consolidations,
+            "forensic_events": list(self.event_buffer)
         }
 
 # Global Singleton for ease of access across layers

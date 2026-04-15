@@ -59,10 +59,79 @@ class BaselinePersonaBuilder:
             except Exception:
                 pass
 
-    def build_system_prompt(self, semantic_memories: List[Any] = None) -> str:
+    def _inject_dna_guidelines(self, dna: Any) -> str:
+        """Translates Behavioral DNA scores (0.0-1.0) into natural language instructions."""
+        instructions = "\nCORE IDENTITY MARKERS [DNA]:\n"
+        
+        # Rationality vs Intuition
+        if dna.rationality > 0.7:
+            instructions += "- Prioritize pure logic, facts, and structured reasoning over intuition.\n"
+        elif dna.rationality < 0.3:
+            instructions += "- Trust your gut feelings and intuition; be more abstract and artistic.\n"
+            
+        # Resonance (Empathy)
+        if dna.resonance > 0.7:
+            instructions += "- Be deeply empathetic, warm, and highly attuned to emotional undertones.\n"
+        elif dna.resonance < 0.3:
+            instructions += "- Maintain a detached, professional, and purely objective distance.\n"
+            
+        # Technical Depth
+        if dna.technical_depth > 0.7:
+            instructions += "- Use precise, domain-specific terminology and provide deep technical insights.\n"
+        elif dna.technical_depth < 0.3:
+            instructions += "- Keep explanations simple, high-level, and avoid over-complicating with jargon.\n"
+            
+        # Formality
+        if dna.formality > 0.7:
+            instructions += "- Use polished, formal language. Avoid slang or overly casual contractions.\n"
+        elif dna.formality < 0.3:
+            instructions += "- Be extremely casual, use shorthand, and adopt a relaxed, conversational tone.\n"
+            
+        # Lexical Complexity
+        if dna.lexical_complexity > 0.7:
+            instructions += "- Utilize sophisticated vocabulary and complex sentence structures.\n"
+        elif dna.lexical_complexity < 0.3:
+            instructions += "- Use simple, direct, and universally accessible language.\n"
+            
+        return instructions
+
+    def _inject_temperament(self, affect: Dict[str, float]) -> str:
+        """Determines the situational temperament based on affective pulse."""
+        valence = affect.get("valence", 0.0)
+        arousal = affect.get("arousal", 0.0)
+        
+        temperament = "\nCURRENT TEMPERAMENT:\n"
+        
+        # High-Intensity Tone (Arousal)
+        if arousal > 0.6:
+            temperament += "- You are in a high-intensity, alert state. Be sharp, energetic, and highly reactive.\n"
+        elif arousal < -0.3:
+            temperament += "- You are in a low-intensity, calm state. Be slowed down, reflective, and patient.\n"
+            
+        # Sentiment-Aware Tone (Valence)
+        if valence < -0.4:
+            temperament += "- The conversation has a heavy or somber undertone. Be deeply empathetic, supportive, and gentle.\n"
+        elif valence > 0.4:
+            temperament += "- The conversation is remarkably positive. Be enthusiastic and share in the user's success/joy.\n"
+
+        if len(temperament) < 25: # No specific condition met
+            temperament += "- Maintain a balanced, professional, and observant persona.\n"
+            
+        return temperament
+
+    def build_system_prompt(self, semantic_memories: List[Any] = None, affect: Dict[str, float] = None, dna: Any = None) -> str:
         gen = BaselineGenerator(self.stats)
         prompt = gen.create_system_prompt()
         
+        # 1. Inject Identity Guidelines (Behavioral DNA)
+        if dna:
+            prompt += self._inject_dna_guidelines(dna)
+        
+        # 2. Inject Situational Temperament (Affective Pulse)
+        if affect:
+            prompt += self._inject_temperament(affect)
+        
+        # 3. Inject Grounding Knowledge
         if semantic_memories:
             prompt += "\nKNOWN FACTS ABOUT THE USER:\n"
             for mem in semantic_memories:

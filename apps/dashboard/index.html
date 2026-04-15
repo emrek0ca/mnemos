@@ -3,324 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MNEMOS | Mnemonic Command Center</title>
+    <title>MNEMOS | Sovereign Identity Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <div class="logo">MNEMOS</div>
-        <div class="badge">COGNITIVE ENGINE v1.2.5</div>
-    </header>
-
-    <div class="dashboard-grid">
-        <!-- Cognitive Health Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Cognitive Health
-                <span style="color: var(--neon-cyan)">OPTIMIZED</span>
-            </div>
-            <div class="gauge-container">
-                <svg class="gauge-svg" viewBox="0 0 150 150">
-                    <circle class="gauge-circle" cx="75" cy="75" r="70" id="health-circle"></circle>
-                </svg>
-                <div class="gauge-value" id="health-value">91%</div>
-            </div>
-            <div style="margin-top: 20px; text-align: center; color: var(--text-secondary); font-size: 0.8rem;">
-                Neural Integrity: <span style="color: white">ACTIVE</span>
-            </div>
+<body class="arctic-protocol">
+    <div id="app">
+        <!-- Dashboard Shell (Auth/Dash toggled via JS) -->
+        <div id="auth-surface" class="view-shell hidden">
+            <!-- Auth card injected here -->
         </div>
 
-        <!-- Memory Growth Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Memory Tiers
-                <span>ALL SYSTEMS ACTIVE</span>
-            </div>
-            <div class="stats-value" id="mem-total">2.4k</div>
-            <div class="stats-label" id="mem-breakdown">
-                Episodic: 1.2k | Semantic: 1.1k | Procedural: 0.1k
-            </div>
-            <div style="margin-top: 30px; height: 100px; display: flex; align-items: flex-end; gap: 8px;">
-                <div style="height: 60%; width: 30px; background: var(--accent-blue); opacity: 0.6; border-radius: 4px;"></div>
-                <div style="height: 80%; width: 30px; background: var(--accent-purple); opacity: 0.6; border-radius: 4px;"></div>
-                <div style="height: 40%; width: 30px; background: var(--accent-cyan); opacity: 0.6; border-radius: 4px;"></div>
-            </div>
-        </div>
-
-        <!-- Affective Pulse Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Affective Pulse
-                <span style="color: var(--accent-purple)">EMPATHETIC</span>
-            </div>
-            <div class="stats-value" id="pulse-valence">0.0</div>
-            <div class="stats-label">
-                Valence Status: <span id="valence-label">NEUTRAL</span>
-            </div>
-            <div style="margin-top: 30px; height: 10px; background: rgba(255,255,255,0.1); border-radius: 99px;">
-                <div id="arousal-bar" style="height: 100%; width: 50%; background: var(--accent-purple); border-radius: 99px; box-shadow: 0 0 10px var(--accent-purple);"></div>
-            </div>
-            <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-secondary); display: flex; justify-content: space-between;">
-                <span>Arousal Intensity</span>
-                <span id="arousal-val">50%</span>
-            </div>
-        </div>
-
-        <!-- Privacy Shield Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Privacy Shield
-                <span style="color: var(--neon-green)">SECURED</span>
-            </div>
-            <div class="stats-value" id="audit-hits">42</div>
-            <div class="stats-label">Total PII Redactions Performed</div>
-            <div style="margin-top: 30px; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px; font-size: 0.8rem; color: #94A3B8;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <span>AES-256 Encryption</span>
-                    <span style="color: white">ACTIVE</span>
+        <div id="dash-surface" class="view-shell">
+            <aside class="sidebar">
+                <div class="brand-header">
+                    <h2 class="mono">MNEMOS</h2>
+                    <span class="label-tech">Sovereign v4.0.1</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Audit Pipeline</span>
-                    <span style="color: white">VERIFIED</span>
+
+                <nav class="nav-group">
+                    <a class="nav-link active" data-tab="chat">_con_chat</a>
+                    <a class="nav-link" data-tab="memory">_sem_memory</a>
+                    <a class="nav-link" data-tab="lattice">_neu_lattice</a>
+                    <a class="nav-link" data-tab="evolution">_sys_evolution</a>
+                    <a class="nav-link" data-tab="identity">_bio_identity</a>
+                </nav>
+
+                <div class="nexus-vision">
+                    <div class="label-tech"><span class="pulse-indicator"></span> Nexus Stream</div>
+                    <div id="nexus-feed" class="mono" style="font-size: 0.65rem; margin-top: 12px; opacity: 0.6;">
+                        Awaiting sensory ingestion...
+                    </div>
                 </div>
-            </div>
+
+                <div class="sidebar-user" style="margin-top: 24px;">
+                    <button id="logout-trigger" class="nav-link" style="border: none; background: none; width: 100%;">_log_terminate</button>
+                </div>
+            </aside>
+
+            <main class="main-stage">
+                <div id="view-mount">
+                    <!-- Dynamic views injected here -->
+                </div>
+            </main>
         </div>
+
+        <footer class="status-bar">
+            <div class="status-left">
+                <span id="latency-val">SYN: 0MS</span> | <span id="user-display">PENDING_IDENTITY</span>
+            </div>
+            <div class="status-right mono">
+                MNEMOS_CORE_ACTIVE: TRUE
+            </div>
+        </footer>
     </div>
 
-    <div class="session-bar">
-        <span><div class="status-dot"></div> TELEMETRY: <span id="telemetry-status">HEALTHY</span></span>
-        <span>LATENCY: <span id="telemetry-latency">115ms</span></span>
-        <span>UPTIME: 99.9%</span>
-    </div>
+    <!-- Onboarding / Overlay Systems -->
+    <div id="modal-container" class="hidden"></div>
+    <div id="popover-container" class="hidden"></div>
 
-        <!-- Neural Integrity Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Integrity
-                <span class="pulse-indicator" style="background: var(--accent-blue)"></span>
-            </div>
-            <div class="stats-value" id="coherence-score">100%</div>
-            <div class="stats-label">KNOWLEDGE COHERENCE</div>
-            <div class="stats-value" id="orphans-count" style="font-size: 1.8rem; margin-top: 15px;">0</div>
-            <div class="stats-label">ORPHANED NODES</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-blue); letter-spacing: 1px;">
-                SELF-HEALING: ENABLED
-            </div>
-        </div>
-
-        <!-- Sovereign Export Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Sovereign Export
-                <span class="pulse-indicator" style="background: var(--accent-purple)"></span>
-            </div>
-            <div style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="alert('Digital Soul packaged. Checking download stream...')">
-                    EXPORT .BRAIN
-                </button>
-            </div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-purple); letter-spacing: 1px;">
-                RESTORATION: ENABLED
-            </div>
-            <div style="margin-top: 5px; font-size: 0.65rem; opacity: 0.6;">
-                AES-256 COGNITIVE ENCRYPTION
-            </div>
-        </div>
-
-        <!-- Neural Bridge Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Bridge
-                <span class="pulse-indicator" style="background: var(--accent-green)"></span>
-            </div>
-            <div class="stats-value" id="shared-facts">0</div>
-            <div class="stats-label">SHARED PERSPECTIVES</div>
-            <div class="stats-value" id="handshakes-total" style="font-size: 1.8rem; margin-top: 15px;">0</div>
-            <div class="stats-label">ACTIVE HANDSHAKES</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-green); letter-spacing: 1px;">
-                TUNNELLING: SECURE
-            </div>
-        </div>
-
-        <!-- Cognitive Multiverse Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Cognitive Multiverse
-                <span class="pulse-indicator" style="background: var(--accent-purple)"></span>
-            </div>
-            <div style="margin-top: 15px;">
-                <select class="btn btn-primary" style="width: 100%; appearance: none; text-align: center;">
-                    <option>TRUE SELF (MAIN)</option>
-                    <option>SCENARIO: ATHLETE</option>
-                    <option>SCENARIO: ARTIST</option>
-                </select>
-            </div>
-            <div class="stats-value" style="font-size: 1.5rem; margin-top: 15px;">0.02%</div>
-            <div class="stats-label">BEHAVIORAL DRIFT</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-purple); letter-spacing: 1px;">
-                SIMULATION: IDLE
-            </div>
-        </div>
-
-        <!-- Cognitive Evolution Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Cognitive Evolution
-                <span class="pulse-indicator" style="background: var(--accent-blue)"></span>
-            </div>
-            <div class="stats-value" id="circular-loops">0</div>
-            <div class="stats-label">CIRCULAR LOGIC LOOPS</div>
-            <div class="stats-value" id="belief-depth" style="font-size: 1.8rem; margin-top: 15px;">0%</div>
-            <div class="stats-label">BELIEF DEPTH</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-blue); letter-spacing: 1px;">
-                WISDOM: RECURSIVE
-            </div>
-        </div>
-
-        <!-- Neural Evolution Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Evolution
-                <span class="pulse-indicator" style="background: var(--accent-orange)"></span>
-            </div>
-            <div class="stats-value" id="alignment-score">95.0%</div>
-            <div class="stats-label">IDENTITY ALIGNMENT</div>
-            <div style="margin-top: 20px;">
-                <button class="btn btn-primary" onclick="alert('Synthetic Gradient Analysis initiated. Curating evolution dataset...')">
-                    EVOLVE SOUL
-                </button>
-            </div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-orange); letter-spacing: 1px;">
-                SOUL: LIVING
-            </div>
-        </div>
-
-        <!-- Ghost Privacy Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Ghost Privacy
-                <span class="pulse-indicator" style="background: var(--accent-red)"></span>
-            </div>
-            <div class="stats-value" id="decoy-count">0</div>
-            <div class="stats-label">DECOY DENSITY</div>
-            <div class="stats-value" id="pending-shreds" style="font-size: 1.8rem; margin-top: 15px;">0</div>
-            <div class="stats-label">PENDING SHREDS</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-red); letter-spacing: 1px;">
-                FORENSICS: OBFUSCATED
-            </div>
-        </div>
-
-        <!-- Neural Lattice Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Lattice
-                <span class="pulse-indicator" style="background: var(--accent-green)"></span>
-            </div>
-            <div class="stats-value" id="lattice-peers">2</div>
-            <div class="stats-label">ACTIVE PEERS</div>
-            <div class="stats-value" id="swarm-tasks" style="font-size: 1.8rem; margin-top: 15px;">0</div>
-            <div class="stats-label">PENDING SWARM TASES</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-green); letter-spacing: 1px;">
-                LATTICE: CONNECTED
-            </div>
-        </div>
-
-        <!-- Neural Singularity Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Singularity
-                <span class="pulse-indicator" style="background: var(--accent-white)"></span>
-            </div>
-            <div class="stats-value" id="code-integrity">94.8%</div>
-            <div class="stats-label">CODE INTEGRITY</div>
-            <div class="stats-value" id="refactor-proposals" style="font-size: 1.8rem; margin-top: 15px;">2</div>
-            <div class="stats-label">PENDING REFACTORS</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-white); letter-spacing: 1px;">
-                SINGULARITY: EMERGENT
-            </div>
-        </div>
-
-        <!-- Sovereign Deployment Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Sovereign Deployment
-                <span class="pulse-indicator" style="background: var(--accent-purple)"></span>
-            </div>
-            <div class="stats-value" id="ledger-integrity">100%</div>
-            <div class="stats-label">LEDGER INTEGRITY</div>
-            <div class="stats-value" id="uptime" style="font-size: 1.8rem; margin-top: 15px;">99.9%</div>
-            <div class="stats-label">24H UPTIME</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-purple); letter-spacing: 1px;">
-                ENGINE: OMNIPRESENT
-            </div>
-        </div>
-
-        <!-- Neural Synesthesia Card -->
-        <div class="glass-container">
-            <div class="card-title">
-                Neural Synesthesia
-                <span class="pulse-indicator" style="background: var(--accent-blue)"></span>
-            </div>
-            <div class="stats-value" id="visual-anchors">0</div>
-            <div class="stats-label">VISUAL ANCHORS</div>
-            <div class="stats-value" id="voice-sync" style="font-size: 1.8rem; margin-top: 15px;">SYNCED</div>
-            <div class="stats-label">AFFECTIVE VOICE SYNC</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--accent-blue); letter-spacing: 1px;">
-                SYNESTHESIA: SYNCED
-            </div>
-        </div>
-
-        <!-- Hive Intelligence Card -->
-        <div class="glass-container" style="border: 2px solid gold; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);">
-            <div class="card-title" style="color: gold;">
-                Hive Intelligence
-                <span class="pulse-indicator" style="background: gold"></span>
-            </div>
-            <div class="stats-value" id="dna-hash" style="font-size: 1rem; color: gold;">8af3c2d1...</div>
-            <div class="stats-label">SOUL DNA FINGERPRINT</div>
-            <div class="stats-value" id="continuity-score" style="font-size: 1.8rem; margin-top: 15px;">100%</div>
-            <div class="stats-label">IDENTITY CONTINUITY</div>
-            <div style="margin-top: 20px; font-size: 0.75rem; color: gold; letter-spacing: 2px; font-weight: bold;">
-                STATUS: HIVE v3.0.0
-            </div>
-        </div>
-
-    <script>
-        // Dashboard Data Connector
-        async function fetchStats() {
-            try {
-                // Fetch Cognitive Health
-                const tResp = await fetch('/api/telemetry');
-                const telemetry = await tResp.json();
-                
-                if (telemetry.status !== "initializing") {
-                    document.getElementById('health-value').innerText = (telemetry.memory_hit_rate * 100).toFixed(0) + '%';
-                    document.getElementById('telemetry-status').innerText = telemetry.status.toUpperCase();
-                    document.getElementById('telemetry-latency').innerText = telemetry.avg_latency_ms + 'ms';
-                    
-                    // Update Circle Dashboard (440 - (hit_rate * 440))
-                    document.getElementById('health-circle').style.strokeDashoffset = 440 - (telemetry.memory_hit_rate * 440);
-                }
-
-                // Fetch Memory Growth
-                const mResp = await fetch('/api/memory/stats');
-                const mem = await mResp.json();
-                document.getElementById('mem-total').innerText = (mem.total_active / 1000).toFixed(1) + 'k';
-                document.getElementById('mem-breakdown').innerText = `Episodic: ${mem.episodic} | Semantic: ${mem.semantic} | Procedural: ${mem.procedural}`;
-
-                // Fetch Audit Summary
-                const aResp = await fetch('/api/audit/summary');
-                const audit = await aResp.json();
-                document.getElementById('audit-hits').innerText = audit.events || 0;
-
-            } catch (err) {
-                console.warn('API Offline or Dashboard Staging Mode:', err);
-            }
-        }
-
-        // Initial fetch and loop
-        fetchStats();
-        setInterval(fetchStats, 5000);
-    </script>
+    <script src="app.js" type="module"></script>
 </body>
 </html>

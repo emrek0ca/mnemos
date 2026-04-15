@@ -23,7 +23,14 @@ class SemanticMemory(BaseModel):
     status: str = "pending_review"  # verified, rejected, pending_review
     visibility: str = "private"  # private, peer_only, public
     ttl_seconds: Optional[int] = None # Ephemeral Life
-    is_decoy: bool = False # Cognitive Camouflage
+    is_obsolete: bool = False # Cognitive Retirement
+    is_locked: bool = False # Paradigm Protection (Locked for RSI)
+    supersedes_id: Optional[str] = None # Fact Lineage
+    
+    # Metabolic Tiering (v3.8.0)
+    metabolic_tier: str = "warm" # warm, cold
+    access_metrics: Dict[str, Any] = Field(default_factory=lambda: {"count": 0, "last_access": datetime.now().isoformat()})
+    
     metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -35,3 +42,12 @@ class ProceduralMemory(BaseModel):
     parameters: Dict[str, Any] = Field(default_factory=dict)
     importance: float = 1.0
     created_at: datetime = Field(default_factory=datetime.now)
+
+class BehavioralDNA(BaseModel):
+    """Dynamic identity markers for style-congruent synthesis."""
+    rationality: float = 0.5
+    resonance: float = 0.5
+    technical_depth: float = 0.5
+    formality: float = 0.5
+    lexical_complexity: float = 0.5
+    last_update: datetime = Field(default_factory=datetime.now)

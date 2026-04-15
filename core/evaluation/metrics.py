@@ -114,12 +114,10 @@ class StyleFidelityMetrics:
             
             comparisons[f"{m}_similarity"] = similarity
 
-        # Semantic Similarity (Real calculation using embeddings)
+        # Semantic Similarity (Real calculation using embeddings - v7.1.0)
         try:
-            from sentence_transformers import SentenceTransformer
+            from core.utils.encoding import encoder
             from sklearn.metrics.pairwise import cosine_similarity
-            
-            model = SentenceTransformer("all-MiniLM-L6-v2")
             
             # Use random samples for performance if datasets are large
             sample_size = min(50, len(real_texts), len(generated_texts))
@@ -127,8 +125,9 @@ class StyleFidelityMetrics:
             r_sample = random.sample(real_texts, sample_size)
             g_sample = random.sample(generated_texts, sample_size)
             
-            r_emb = model.encode(r_sample)
-            g_emb = model.encode(g_sample)
+            # Use centralized high-fidelity multilingual encoder
+            r_emb = encoder.encode(r_sample)
+            g_emb = encoder.encode(g_sample)
             
             # Global semantic overlap
             sim_matrix = cosine_similarity(r_emb, g_emb)
@@ -136,6 +135,7 @@ class StyleFidelityMetrics:
             semantic_score = float(np.mean(np.max(sim_matrix, axis=0)))
             
         except Exception as e:
+            from loguru import logger
             logger.warning(f"Semantic comparison failed: {e}")
             semantic_score = 0.5 # Default fallback
 

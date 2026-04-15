@@ -16,7 +16,32 @@ cp .env.example .env
 # Edit .env: set USER_NAME, USER_ID, INFERENCE_BACKEND, API keys
 ```
 
-## 1. Ingest Telegram Export
+## 1. Mnemonic API Server (v3.4.0)
+
+Operationalize the digital twin's cognitive cortex.
+
+```bash
+# Launch server on default port (8000)
+uv run python -m core.api.server
+
+# Launch on custom port (e.g. for avoiding local conflicts)
+uv run python -m core.api.server --port 8001
+```
+
+### Health & Pulse Check
+
+```bash
+# Verify API pulse
+curl -s http://127.0.0.1:8000/api/health
+
+# Run Forensic Identity Drift Audit
+curl -s http://127.0.0.1:8000/api/integrity/drift
+
+# Get Cognitive Memory Statistics
+curl -s http://127.0.0.1:8000/api/memory/stats
+```
+
+## 2. Ingest Telegram Export
 
 Place your `result.json` (Telegram Desktop → Settings → Export Chat History) in `artifacts/raw/`.
 
@@ -25,70 +50,36 @@ uv run python -m apps.cli.main ingest \
   --source artifacts/raw/result.json \
   --user-id YOUR_TELEGRAM_USER_ID
 # Output: artifacts/processed/ingested.jsonl
-
-# With media asset linkage
-uv run python -m apps.cli.main ingest \
-  --source artifacts/raw/result.json \
-  --user-id YOUR_TELEGRAM_USER_ID \
-  --media
 ```
 
-## 2. PII Redaction
+## 3. PII Redaction & Privacy
 
 ```bash
 uv run python -m apps.cli.main redact \
   --input-file artifacts/processed/ingested.jsonl
 # Output:  artifacts/processed/redacted.jsonl
-# Audit:   artifacts/eval/privacy_audit.json
 ```
 
-## 3. Build Training Dataset
+## 4. Reflective Interactive Mode
+
+Run the digital twin with hierarchical memory (System 1/System 2) and full reasoning loops.
 
 ```bash
-uv run python -m apps.cli.main build-dataset \
-  --input-file artifacts/processed/redacted.jsonl \
-  --window 5
-# Output: artifacts/datasets/train.jsonl
-#         artifacts/datasets/val.jsonl
-```
-
-## 4. Style Evaluation
-
-```bash
-# Print statistics to terminal
-uv run python -m apps.cli.main evaluate \
-  --input-file artifacts/processed/redacted.jsonl
-
-# Generate HTML report
-uv run python -m apps.cli.main generate-report \
-  --input-file artifacts/processed/redacted.jsonl \
-  --output-path artifacts/eval/report.html
-```
-
-## 5. Run Full Pipeline (ingest → redact → dataset in one command)
-
-```bash
-uv run python -m apps.cli.main run-pipeline \
-  --source artifacts/raw/result.json \
-  --user-id YOUR_TELEGRAM_USER_ID
-```
-
-## 6. Chat with Digital Twin (CLI)
-
-```bash
-# Stub mode — works offline, no API key needed
-uv run python -m apps.cli.main chat \
-  --mode baseline \
-  --input-file artifacts/processed/redacted.jsonl
-
-# With real LLM (set INFERENCE_BACKEND in .env first)
-uv run python -m apps.cli.main chat --mode baseline
-
-# Full agent mode with hierarchical memory and reasoning loop
+# Full agent mode with hierarchical memory
 uv run python -m apps.cli.main reflective-chat --mode baseline
 ```
 
-## 7. Configure LLM Backend
+## 5. Cognitive Verification
+
+```bash
+# Run 100% Industrial Integrity Suite (83+ tests)
+uv run pytest tests/test_cognitive_integrity.py -v
+
+# Run Full Regression Suite
+uv run pytest tests/ -v
+```
+
+## 6. Configure LLM Backend
 
 Edit `.env`:
 
@@ -96,47 +87,33 @@ Edit `.env`:
 # A: Anthropic Claude (cloud, high quality)
 INFERENCE_BACKEND=anthropic
 ANTHROPIC_API_KEY=sk-ant-...
-ANTHROPIC_MODEL=claude-sonnet-4-6
 
 # B: Ollama (local, fully private)
 INFERENCE_BACKEND=ollama
-OLLAMA_MODEL=llama3        # first run: ollama pull llama3
-OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3
 
 # C: Stub (offline, for testing the pipeline without LLM costs)
 INFERENCE_BACKEND=stub
 ```
 
-## 8. Telegram Bot
+## 7. Development & Quality
 
 ```bash
-# Set TELEGRAM_BOT_TOKEN in .env, then:
-uv run python -m apps.cli.main bot --mode baseline
-```
-
-## 9. Development
-
-```bash
-# Type check
+# Type check across all layers
 uv run pyright core/ apps/
 
-# Lint
+# Style check
 uv run ruff check core/ apps/
-
-# Tests
-uv run pytest tests/ -v
 ```
 
-## 10. Smoke test (no data files needed)
+## 8. Smoke test (Neural Integrity)
 
 ```bash
 uv run python -c "
-from core.ingestion.telegram import TelegramIngestor
-from core.privacy.redactor import Redactor
-from core.datasets.builder import DatasetBuilder
 from core.inference.engine import InferenceEngine
 from core.memory.controller import MemoryController
 from core.cognition.agent import MnemosAgent
-print('All imports OK')
+from core.orchestration.drift import MnemosDriftAuditor
+print('MNEMOS v3.4.0 Core Components: OK')
 "
 ```

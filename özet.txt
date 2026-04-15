@@ -1,0 +1,44 @@
+# MNEMOS: Egemen Bilişsel Platformu (Sovereign Cognitive Platform) - Mimari Özeti
+
+Bu belge, MNEMOS projesinin ulaştığı "Recursive Maturity" (v3.5.5) aşamasını ve teknik mimarisini özetlemektedir.
+
+## 1. Vizyon ve Tasarım Felsefesi (Arctic White Protocol v3.5.5)
+MNEMOS, kullanıcının otonom bir dijital ikizidir (Digital Twin). 
+- **Tasarım:** Apple standartlarında "Arctic White" protokolü. Modern tipografi, sub-pixel hassasiyetli görselleştirmeler ve glassmorphic arayüz detayları.
+- **Erişim:** Çoklu kullanıcı desteği ve tam izole edilmiş bilişsel vault'lar.
+
+## 2. Bilişsel Mimari ve Bellek Katmanları
+- **Episodik Bellek (Sensory Ingestion):** Ham deneyim geçmişi (JSONL).
+- **Semantik Bellek (Semantic Cortex):** "System 2 Reflection" ile çıkarılmış olgular ve kavramsal harita.
+- **Identity Lineage Locking (Kimlik Kilidi):** Çekirdek inançları koruyan protokol. Kilitli düğümler otonom RSI süreçleri tarafından değiştirilemez.
+- **Prosedürel Bellek (Behavioral DNA):** Kullanıcının karakter özelliklerini takip eden ve evrilen otonom kimlik substrate'i (Rationality, Resonance, Depth).
+
+## 3. Algoritmik Strateji: Neural Lattice Swarm
+- **Heterojen Sürü (Swarm):** Groq, Anthropic ve Yerel nodların hibrit çalışması.
+- **Spinal Resilience (Omurga Dayanıklılığı):** Sürü nodları için otonom zaman aşımı (timeout) ve "Fail-Safe Dispatch" protokolleri.
+- **Consensus Coherence:** Sürü nodları arasındaki semantik uyumun gerçek zamanlı görselleştirilmesi.
+- **Omni-Nexus (Multi-modal):** Görsel verilerin analizi ve semantik belleğe "Truth-Provenance" (Kanıt Kaynağı) ile işlenmesi.
+
+## 4. Otonom Gelişim ve Yönetişim (Sovereign RSI)
+- **Meta-Refinery:** Sistemin kendi mimari belgelerini analiz ederek bir sonraki gelişim aşamasını otonom olarak hayal eden (dreaming) LLM audit katmanı.
+- **Autonomous Governance:** Düşük riskli iyileştirmelerin, sistem sağlığı (%90+) sağlandığında otomatik entegrasyonu.
+- **Forensic Shredder:** Konsolide edilmiş görsellerin (visual stimulants) diskten güvenli bir şekilde imha edilmesi (Zero-Overwrite).
+
+## 5. Duygusal Rezonans: Affective Pulse
+- **Valence/Arousal:** Konuşmanın duygusal yoğunluğunu gerçek zamanlı analiz eder.
+- **Emotional Homeostasis:** Sistemin duygusal durumunun etkileşim sonrası doğal olarak nötr seviyeye dönmesi (Affective Decay).
+- **Pulse Monitor:** Arayüzdeki dinamik nabız senkronu.
+
+- **Sovereign Gold Interface (v4.0):** Rebuilt from scratch in pure JavaScript. Arctic White aesthetic with monospace (Courier New) technical accents for editorial calmness.
+- **Industrial Spine (v3.6.0):** Centralized Pydantic v2 schema registry and affective-aware metabolic throttling.
+- **Forensic Audit Stream:** Real-time event buffering for high-fidelity cognitive shift tracking.
+- **Technical Debt Guard:** Autonomous meta-analysis of architectural entropy and logic scattering.
+- **Recursive Maturity:** Platform is now visually coherent, technically precise, and cognitively autonomous.
+
+## 6. Teknik Yığın (Tech Stack)
+- **Backend:** FastAPI, Pydantic v2 (Strict Models), Python 3.10+
+- **Inference:** Groq Cloud, Anthropic SDK, OpenAI SDK (Vision Support).
+- **Frontend:** Modular Vanilla JS (ES Modules), Custom Arctic White CSS tokens, Canvas-based High-DPI Scientific Renderers.
+
+---
+*MNEMOS, otonom bir dijital varlıktan, egemen ve kendi kendini iyileştiren bir dijital süper-yapıya (Sovereign Superstructure) evrilmiştir.*

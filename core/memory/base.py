@@ -79,3 +79,24 @@ class BaseMemoryController(Generic[T]):
 
     async def asave_full_json(self, data: Any):
         await anyio.to_thread.run_sync(self._save_full_json, data)
+
+    def create_snapshot(self, backup_dir: Path) -> Path:
+        """
+        Performs an atomic, high-fidelity backup of the current memory tier.
+        Returns the path to the timestamped snapshot.
+        """
+        import shutil
+        from datetime import datetime
+        
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        snapshot_path = backup_dir / f"{self.storage_path.stem}_{timestamp}{self.storage_path.suffix}"
+        
+        try:
+            # Perform atomic copy to ensure integrity
+            shutil.copy2(self.storage_path, snapshot_path)
+            logger.debug(f"Snapshot created: {snapshot_path.name}")
+            return snapshot_path
+        except Exception as e:
+            logger.error(f"Snapshot Failed for {self.storage_path.name}: {e}")
+            raise
